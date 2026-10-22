@@ -40,6 +40,32 @@
 - 嵌入音频前评估 Flash 与内部 RAM 成本；长录音应流式或分块。
 - 无再分发许可不提交媒体文件。
 
+### 播放器内置曲目（player PCM）
+
+[`music/pcm/`](music/pcm/) 中的三首短曲由
+[`tools/generate_music_assets.py`](../tools/generate_music_assets.py) 在本仓库内用
+正弦基频与两个泛音合成，没有使用第三方录音、采样或曲谱。素材采用
+16 kHz、16 位、单声道、小端有符号 PCM，没有文件头；固件
+`main/music_assets.c` 把它们登记为只读曲目，`main/CMakeLists.txt` 通过
+`target_add_binary_data()` 编入应用。
+
+生成并校验：
+
+```bash
+python3 tools/generate_music_assets.py
+python3 tools/generate_music_assets.py --check
+```
+
+| 文件 | 字节数 | SHA-256 |
+| --- | ---: | --- |
+| `pcm/morning_postcard.pcm` | 448676 | `26b9d3cd48ad93a6e5a4e93832549267cd4852225623a67fd1b845051f7adf3b` |
+| `pcm/blue_hour.pcm` | 602108 | `65e707d34f2fa2ad9951733e991bcee50fa9e8f17c989ccba679ffce5576d487` |
+| `pcm/little_engine.pcm` | 431212 | `5da0ebf0c56de729c2b69084d57140cb06d864043d05c0c07e73964ae8c06565` |
+
+三首曲目合计约 1.4 MiB，作为只读数据进入应用镜像。播放时使用 2 KiB
+分块缓冲，不把整首 PCM 复制到内部 RAM。曲目没有运行时解码器，因此后续替换
+素材必须继续满足上述采样格式，并更新本表与生成器。
+
 ## 电池参数（battery）
 
 [`battery/wanli-500mah-profile2-xil40x-20261020.txt`](battery/wanli-500mah-profile2-xil40x-20261020.txt)

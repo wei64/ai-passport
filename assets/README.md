@@ -42,6 +42,33 @@ Store reusable music and sound-effect sources in `music/`.
 - Check Flash and internal-RAM cost before embedding audio; stream or chunk long recordings.
 - Do not commit media without redistribution permission.
 
+### Player PCM tracks
+
+The three short tracks in [`music/pcm/`](music/pcm/) are synthesized in this
+repository by [`tools/generate_music_assets.py`](../tools/generate_music_assets.py)
+from sine fundamentals and two overtones. They use no third-party recordings,
+samples, or scores. The assets are headerless little-endian signed PCM at
+16 kHz, 16-bit, mono. `main/music_assets.c` registers them as read-only tracks,
+and `main/CMakeLists.txt` embeds them with `target_add_binary_data()`.
+
+Generate and verify:
+
+```bash
+python3 tools/generate_music_assets.py
+python3 tools/generate_music_assets.py --check
+```
+
+| File | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `pcm/morning_postcard.pcm` | 448676 | `26b9d3cd48ad93a6e5a4e93832549267cd4852225623a67fd1b845051f7adf3b` |
+| `pcm/blue_hour.pcm` | 602108 | `65e707d34f2fa2ad9951733e991bcee50fa9e8f17c989ccba679ffce5576d487` |
+| `pcm/little_engine.pcm` | 431212 | `5da0ebf0c56de729c2b69084d57140cb06d864043d05c0c07e73964ae8c06565` |
+
+The tracks total about 1.4 MiB and remain read-only application data. Playback
+uses a 2 KiB chunk buffer instead of copying a whole track into internal RAM.
+There is no runtime decoder, so replacement assets must retain this sample
+format and update both the table above and the generator.
+
 ## Battery profiles
 
 [`battery/wanli-500mah-profile2-xil40x-20261020.txt`](battery/wanli-500mah-profile2-xil40x-20261020.txt)
